@@ -1,0 +1,45 @@
+<html lang="pl">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Skoki Narciarskie 2D, Android" />
+		<meta name="keywords" content="Skijump, Android, Skoki, Java" />
+		
+		<link rel="stylesheet" href="style/main_style.css" type="text/css" />
+	</head>
+	
+	<body onclick="onClick(event)" onkeydown="keyPress(event)" style="background-color: black; margin-top: 15px; padding: 0px; overflow: hidden;">
+		<div id="main">
+			<div style="float: right"> Polish Ski Jump wersja 0.1 </div>
+			<canvas id="main_canvas" width="600px" height="400px"></canvas>
+			<script src="src/jquery-1.11.0.min.js"></script>
+			<script src="src/md5.js"></script>
+	
+			<script type="text/javascript" src="./src/tools.js"></script>
+			<script type="text/javascript" src="./src/primitives.js"></script>
+			<script type="text/javascript" src="./src/graphics.js"></script>
+			<script type="text/javascript" src="./src/database.js"></script>
+			<script type="text/javascript" src="./src/skijump.js"></script>
+			<script type="text/javascript" src="./src/main.js"></script>
+			<div style="display: inline-block; margin-top: 30px; font-size: 10px; text-align: justify; color: gray">
+				<div style="float: left;  width: 50%">
+					<div style="font-size: 15px; color: white"> Użyte technologie: </div>
+					<ol>
+						<li> Edytory: Eclipse Luna, Geany </li>
+						<li> Języki: Javascript, HTML5 Canvas, PHP5, MySQL </li>
+						<li> Biblioteki: Ajax, JQuery </li>
+						<li> System operacyjny: Ubuntu 14.04 64bit </li>
+						<li> System kontroli wersji: Github </li>
+					</ol>
+				</div>
+				<div style="float: right; width: 50%">
+					<div style="font-size: 15px; color: white"> Wymagania: </div>
+					<ol>
+						<li> Gra testowana na: Chrome, Firefox, Opera </li>
+						<li> RAM: 128MB </li>
+						<li> OS: Windows, Linux, Mac OS X </li>
+					</ol>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
