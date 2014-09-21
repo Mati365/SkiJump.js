@@ -319,7 +319,6 @@ function JumperScore() {
 	}
 	this.updateOwnHash = function() {
 		this.old_score_hash = this.generateNewHash();
-		console.log(this.old_score_hash == this.generateNewHash());
 	}
 	this.isEqualWithOld = function() {
 		return this.generateNewHash() == this.old_score_hash;
@@ -520,8 +519,6 @@ function Jumper() {
 	this.update = function() {
 		if(!this.status.pause)
 			this.v += (config.SPEEDING + config.WIND_SPEEDING / 2.0) * 3.0 * this.getAngleMargin(this.vertical_angle);
-		
-		console.log(this.getAngleMargin(this.vertical_angle));
 		this.rotate(Wind.wind_speed * .65);
 		this.updateState();
 		this.status.update();

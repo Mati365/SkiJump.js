@@ -10,7 +10,7 @@ function jsonToServer(_data, _callback) {
 	_data['key'] = new String(CryptoJS.MD5(text));
 	$.ajax({
 		type: "GET",
-		url: "http://syf.bl.ee/POLISH_SKIJUMP/skijump_server.php?callback=?",
+		url: "http://skijumppl.hol.es/skijump_server.php?callback=?",
 		async: false,
 		data: _data,
 		dataType: "jsonp",
