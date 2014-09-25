@@ -717,7 +717,7 @@ function ScoreBoard(title, title_color, element_color) {
 		this.title_color.a = 1 - this.transparency[l - 1].alpha * 5 / 100;
 		printText(ctx, 16 + margin.X, 35 + margin.Y, this.title, 17, this.title_color.toString());
 		
-		var best = 	this.title.indexOf('best') > 0;
+		var best = 	this.title.indexOf('Najlepsi') >= 0;
 		for(var i = 0;i < l; ++i) {
 			var str = players[i][0];
 			for(var j = str.length;j < 11;++j)
