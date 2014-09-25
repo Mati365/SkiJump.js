@@ -287,7 +287,7 @@ function FlightPath(jumper) {
         }
         
         this.time += .15;
-        this.v_0.X += config.WIND_SPEEDING / 4;
+        this.v_0.X += config.WIND_SPEEDING / 4 + jumper.getAngleMargin(jumper.angle) * .05;
         
         this.jumper.pos.X = this.s_0.X + 
 									this.v_0.X * this.time;
@@ -508,7 +508,7 @@ function Jumper() {
 				return;
 			
 			this.angle = this.vertical_angle;
-			this.v *= 1.15;
+			this.v *= 1.25;
 			this.jumped = true;
 		}
 	}
@@ -518,8 +518,8 @@ function Jumper() {
 	}
 	this.update = function() {
 		if(!this.status.pause)
-			this.v += (config.SPEEDING + config.WIND_SPEEDING / 2.0) * 3.0 * this.getAngleMargin(this.vertical_angle);
-		this.rotate(Wind.wind_speed * .65);
+			this.v += (config.SPEEDING + config.WIND_SPEEDING) * 1.4 * this.getAngleMargin(this.vertical_angle);
+		this.rotate(Wind.wind_speed * .85);
 		this.updateState();
 		this.status.update();
 	}
@@ -531,25 +531,27 @@ function Jumper() {
 						this.pos, 
 						this.angle, 
 						new Vec2(0, JUMPER_BOUNDS.H));
-		// Flaga i info
+		// Flaga i info					
+		ctx.save();
+		ctx.translate(this.pos.X, this.pos.Y);
 		drawResizedCanvas(
-					content.flags.getByIndex(this.score.flag), 
-					surface, 
-					new Vec2(this.pos.X, this.pos.Y - 18),
-					new Vec2(8, 8));
-		printText(ctx,  this.pos.X + 10, this.pos.Y - 12, this.score.nick, 7, "white");
+			content.flags.getByIndex(this.score.flag), 
+			surface, 
+			new Vec2(0, -18),
+			new Vec2(8, 8));
+		printText(ctx,  10, -12, this.score.nick, 7, "white");
 		if(this.flight_state != STATE.ON_DESK) {
 			if(this.flight_state <= STATE.ON_SKIJUMP)
-				printText(ctx,  this.pos.X + 10, 
-						this.pos.Y - 20, 
-						"Speed: " + parseInt(this.getHUDSpeed()) + " km/h", 
+				printText(ctx,  10, -20, 
+						"Prędkość: " + parseInt(this.getHUDSpeed()) + " km/h", 
 						5, "white");
 			else if(this.status.ground_proc > 0)
-				printText(ctx,  this.pos.X + 10, 
-						this.pos.Y - 20, "Distance: " + 
+				printText(ctx,  10, -20, "Dystans: " + 
 						(this.status.distance == 0 ? this.status.procToMeters(this.status.ground_proc) : this.status.distance).toFixed(1) + "m", 
 						5, "white");
 		}
+		ctx.restore();
+		
 		// Strzałka wiatru
 		if(this.flight_state <= STATE.ON_WIND && this.flight_state != STATE.ON_DESK) {
 			ctx.save();
@@ -587,25 +589,16 @@ function Wind() {
 }
 Wind.wind_speed = 	0;
 Wind.good_wind	=	false;
-Wind.angle		=	getRandom(0, 360);
-Wind.tick		=	0;
 Wind.updateWind = function() {
-	this.tick++;
-	this.angle = getRandom(this.angle - 10, this.angle + 10);
-	if(this.tick > 2) {
-		this.angle += 270;
-		this.tick = 0;
-	}
-	var rad = toRad(this.angle);
-	this.wind_speed = 	Math.cos(rad) + Math.sin(rad);
-	this.good_wind	=	this.wind_speed > 0;
-	
-	config.WIND_SPEEDING = this.wind_speed / 74;
+	var v = getRandom(-10, 10) / 40;
+	if(this.wind_speed + v > .8 || this.wind_speed + v < 0.0)
+		v = -v;
+	this.wind_speed +=  v;
+	this.good_wind			=	this.wind_speed > .4;
+	config.WIND_SPEEDING 	= 	this.wind_speed / 50;
 }
 Wind.updateWind();
-
-// jebac synchronizacje w js
-setInterval(function() { Wind.updateWind(); }, 2000);
+setInterval(function() { Wind.updateWind(); }, 1000);
 
 var GAME_STATE = {
 	ENTER_NICK	:	0,
@@ -616,11 +609,11 @@ var GAME_STATE = {
 var	game_state	= GAME_STATE.ENTER_NICK;
 
 var key_config = [
-	"[D] to start",
-	"[a/d] tilt [space] jump",
-	"[space] retry",
-	"[A/D] tilt",
-	"[F] start game"
+	"[D] Start z deski startowej",
+	"[spacja] Wybicie z progu",
+	"[space] Spróbuj ponownie",
+	"[a/d] Obrót",
+	"[F] Zaczynaj grę"
 ];
 var ctx 			= 	surface.ctx;
 var	screen_shadow	=	true;
@@ -789,10 +782,10 @@ function stopBestInterval() {
 	best_players_interval = -1;
 }
 
-var	last_scoreboard	=	new ScoreBoard("New players:", 
+var	last_scoreboard	=	new ScoreBoard("Ostatni gracze:", 
 											new gColor(255, 165, 0, 1), 
 											gColor.WHITE);
-var	best_scoreboard	=	new ScoreBoard("The best:", 
+var	best_scoreboard	=	new ScoreBoard("Najlepsi:", 
 											new gColor(79, 70, 242, 1), 
 											gColor.WHITE);
 var	show_ambulance		=	true;
@@ -830,7 +823,7 @@ function drawNickInfo() {
 				str += show_ambulance? '|' : ' ';
 		}
 	
-	printText(ctx, 20, 50, "Enter nick:", 19, flag_selecting ? "#575757" : "white");
+	printText(ctx, 20, 50, "Wpisz nick:", 19, flag_selecting ? "#575757" : "white");
 	printText(ctx, 207, 50, str, 19, flag_selecting ? "gray" : "white");
 	
 	last_scoreboard.draw(last_players, new Vec2(slides.last2, 80));
@@ -850,20 +843,20 @@ function drawFlagInfo() {
 	menu_flag.draw(new Vec2(0, 0), false);
 	ctx.restore();
 	
-	printText(ctx, 20, 84, "Nation:", 19, flag_selecting ? "white" : "#575757");
+	printText(ctx, 20, 84, "Kraj:", 19, flag_selecting ? "white" : "#575757");
 }
 function drawHelp() {
 	if(game_state == GAME_STATE.MENU) {
 		for(var i = 0, l = key_config.length;i < l;++i) {
 			var begin_game = i == 4;
-			printText(ctx, 120, 120 + i * 20, key_config[i], begin_game ? 15 : 12,  begin_game ? "orange" : "white");
+			printText(ctx, 60, 120 + i * 20, key_config[i], begin_game ? 15 : 12,  begin_game ? "orange" : "white");
 		}
-		printText(ctx, 175, 30, "Polish", 25, "white");
-		printText(ctx, 215, 70, "Ski Jump", 19, "red");
+		printText(ctx, 115, 40, "Polish", 30, "white");
+		printText(ctx, 155, 70, "Ski Jump", 19, "red");
 		
 		var logo = content.player_tile.getImage(3, 0);
 		logo.bounds.W = logo.bounds.H = 64;
-		drawCanvas(logo, surface, new Vec2(110, 10));	
+		drawCanvas(logo, surface, new Vec2(50, 10));	
 		logo.bounds.copy(JUMPER_BOUNDS);
 		return;
 	}
@@ -878,13 +871,13 @@ function drawHelp() {
 				closeNickInfo();
 				game_state = GAME_STATE.MENU;
 			} else {
-				printText(ctx, 0, 20, "EMPTY NICK!!", 13, "black", true);
+				printText(ctx, 0, 20, "Pusty nick!", 13, "black", true);
 				nick_entered = false;
 			}
 		else if(!flag_selecting)
-			printText(ctx, 0, 20, "[ space ] enter nick", 16, "black", true);
+			printText(ctx, 0, 20, "[spacja]Zatwierdź nick", 16, "black", true);
 		else
-			printText(ctx, 0, 20, "[a/d] select flag [f] enter", 16, "black", true);
+			printText(ctx, 0, 20, "[a/d] Wybierz Flage [f] Zatwierdź", 14, "black", true);
 	} else
 		switch(jumper.flight_state) {	
 			case STATE.ON_DESK:
@@ -896,7 +889,7 @@ function drawHelp() {
 			break;
 			
 			case STATE.ON_RAMP:
-				printText(ctx, 0, 20, "JUMP!!!", 19, "black", true);
+				printText(ctx, 0, 20, "Skacz!!!", 19, "black", true);
 			break;
 			
 			case STATE.ON_WIND:
@@ -908,7 +901,7 @@ function drawHelp() {
 				if(jumper.status.dead || game_state == GAME_STATE.SCORE)
 					printText(ctx, 0, 20, key_config[2], 16, "black", true);
 				else
-					printText(ctx, 0, 20, "Hamsters are counting points..", 13, "black", true);
+					printText(ctx, 0, 20, "Chomiki liczą punkty..", 16, "black", true);
 			break;
 		};
 	ctx.restore();
@@ -937,7 +930,7 @@ function drawJuryNotes() {
 }
 function drawHUD() {
 	if(screen_shadow)
-		fillRect(ctx, new Rect(0, 0, surface.bounds.W, surface.bounds.H), new gColor(0, 0, 0, .7));
+		fillRect(ctx, new Rect(0, 0, surface.bounds.W, surface.bounds.H), new gColor(0, 0, 0, .8));
 	
 	if(!wait_for_score && 
 		game_state != GAME_STATE.SCORE && 
@@ -974,21 +967,21 @@ function drawHUD() {
 			2);
 	
 	if(build_info)
-		printText(ctx, 5, 15, "Author: Mateusz Baginski   Ver.: 0.1   Inter. Prod. IT ", 8, "white");
+		printText(ctx, 5, 15, "Autor: Mateusz Baginski   Ver.: 0.1   Inter. Prod. IT ", 8, "white");
 	else if(!dead) {
-		printText(ctx, 6, 14, "wind:", 8, "white");
+		printText(ctx, 6, 14, "Wiatr:", 8, "white");
 		printText(ctx, 50, 14, Wind.wind_speed.toFixed(1) + "km/h", 8, Wind.good_wind ? "green" : "#DE3A3A");
 		
-		printText(ctx, 125, 14, "takeoff:", 8, "white");
+		printText(ctx, 125, 14, "Wybicie:", 8, "white");
 		printText(ctx, 190, 14, jumper.status.ramp_speed.toFixed(1) + "km/h", 8, "#4F46F2");
 		
-		printText(ctx, 265, 14, "distance:", 8, "white");
+		printText(ctx, 265, 14, "Dystans:", 8, "white");
 		printText(ctx, 345, 14, jumper.status.distance.toFixed(1) + "m", 8, "white");
 		
 		if(game_state == GAME_STATE.SCORE)
 			drawJuryNotes();
 	} else
-		printText(ctx, 0, 16, "You are dead, try again!!!!", 15, "red", true);
+		printText(ctx, 0, 16, "Jesteś martwy, spróbuj ponownie!", 15, "red", true);
 	
 	ctx.restore();
 	if(game_state == GAME_STATE.SCORE)
@@ -1150,7 +1143,7 @@ function drawMap() {
 	
 	people.draw();
 	drawMapObjects(false, surface);
-	flag.draw(new Vec2(100, 65), !Wind.good_wind);
+	flag.draw(new Vec2(100, 65), Wind.good_wind);
 	
 	drawCanvas(content.hud.getImage(!Wind.good_wind, 2), surface, new Vec2(108, 102));
 }
